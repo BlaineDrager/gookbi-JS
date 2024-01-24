@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="./xhr3.css"><!--CSS 연결-->
+    <script defer src="./xhr3.js"></script><!--js 연결 연결이되었는지 확인하고 싶다면 컨트롤 클릭을 해볼것 // defer 를 통해 </html> 이후에 실행 시켜주게 만들어줌 -->
+</head>
+<body>
+<div id="loading">
+    <img src="./xhr3.loading.png" alt="" class="icon">
+    <span class="text">데이터를 불러오고 있습니다.<br>잠시만 기다려 주세요.</span>
+</div>
+<header id="header">
+    <form class="form" id="searchForm">검색 폼</form>
+    <div class="spring"></div>
+    <form class="form" id="requestForm">
+        <label class="label">
+            <span class="text">요청건수</span>
+            <input required class="input" max="500" min="5" name="numOfRows" type="number" value="50" placeholder="">
+        </label>
+        <input type="submit" name="데이터 요청" class="button">
+    </form>
+</header>
+<main id="main">
+    <table id="table">
+        <thead>
+        <tr>
+            <th>단축 코드</th>
+            <th>ISNIN 코드</th>
+            <th>시장 구축</th>
+            <th>종목 이름</th>
+            <th>법인 등록 번호</th>
+            <th>법인 이름</th>
+            <th>메뉴</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th></th>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+                <a href="#" class="item">네이버 주식</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+<footer id="footer">푸터</footer>
+</body>
+</html>

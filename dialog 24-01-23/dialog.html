@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>이벤트 실습</title>
+    <link href="./dialog.css" rel="stylesheet">
+</head>
+<body>
+<header id="header">
+    <form id="addForm">
+        <label class="label">
+            <span class="text">제목</span>
+            <input required class="input" minlength="1" maxlength="50" name="title" placeholder="제목을 입력해 주세요." type="text">
+        </label>
+        <label class="label">
+            <span class="text">내용</span>
+            <input required class="input" minlength="1" maxlength="100" name="content" placeholder="내용을 입력해 주세요." type="text">
+        </label>
+        <input class="button" type="submit" value="창 만들기">
+    </form>
+</header>
+<main id="main"></main><!-- data- 의 의미는 js 데이터를 주거니 받거니하기가 쉬워지게 된다. 식별자 지정을 위한 것-->
+<footer id="footer">
+    <div class="item">제목 자리</div>
+</footer>
+<script>
+    const addForm = document.getElementById('addForm'); // form 태그 불러오기
+    // 창 옮기기를 할 때 // 마우스를 누르고(M.D) 마우스를 움직이며(M.Move) 마우스를 땔때까지(M.U)// 해당 창이 내 마우스를 따라 다닌다고 생각하면된다
+    const main = document.getElementById('main'); // id 가 메인인 녀석을 끌어 옴 // 가상요소
+    const footer = document.getElementById('footer');
+    let lastZIndex = 0;
+
+    function attachDialogEvents(dialog) { // 함수 생성 // 각 이벤트에 Dialog 를 붙이는(attach) 역할을 하는 함수 // 회색이 뜨면 호출 된 적이 없다 // 매개변수로 dialog 가 들어가게됨
+        // 앞으로 가지고 오기
+        dialog.onmousedown = function () { // 마우스를 눌렀을 때의 함수 실행
+            dialog.style.zIndex = ++lastZIndex; // dialog의 style 중 zIndex 에 ++1 을 한 lastZIndex를 넣음 // 해당 태그를 누를때 마다 zIndex 가 늘어나게 만들어 준다
+            saveDialogs(); // saveDialogs 함수를 넣어서 저장을 시킴 // 이에 대해 문제가 발생할 수 있는데 한 태그만 여러번 클릭하여 zIndex 가 늘어나고 이후 다른 태그를 누르게 되면 0 에서 시작하기 때문에 기존에 여러번 체크했던 태그가 계속 앞으로 나타나게 된다 이를 방지하기위해
+        }
+        // 옮기기
+        const title = dialog.querySelector(':scope > .title-bar > .title');
+        title.onmousedown = function (e) { // 브라우저가 실행 해주기에 매개변수 e 를 넣으면 브라우저에 있는 event 속성을 부여할 수 있게된다 // 마우스를 눌렀을떄에 발생할 현상을 아래에 적어준다
+            console.log(e); // 이벤트 속성을 보여줄 수 있다 // 속성을 좀 잘 찾아보도록하자
+            // console.log("옮기기 시작");
+            dialog.isMoving = true; // 자바에서는 불가능 하다 //
+            dialog.dragStartPosX = e.pageX; // 드래그 시작 커서 X 의 좌표 지정
+            dialog.dragStartPosY = e.pageY; // 드래그 시작 커서 Y 의 좌표 지정
+            dialog.dragStartTop = dialog.offsetTop; // 드래그 시작 top 현재 위치
+            dialog.dragStartLeft = dialog.offsetLeft; // 드래그 시작 left 현재 위치
+        }
+
+        main.addEventListener('mousemove', function (e) {
+            if(dialog.isMoving !== true) { // dialog.isMoving === false 라고 쓰면 undefined === false 라고 묻기 때문에 true 가 아닌 지에 대해 묻게 만든다
+                return;
+            }
+            // console.log("옮기는 중")
+            const currentPosX = e.pageX; // 움직인 후의 커서 좌표 X 위치에 대한 상수 선언
+            const currentPosY = e.pageY; // 움직인 후의 커서 좌표 Y 위치
+            const deltaX = currentPosX - dialog.dragStartPosX; // X 축으로 움직인 거리로 움직인 후의 커서 좌표위치에서 드래그 시작 커서 위치를 뺀 결과
+            const deltaY = currentPosY - dialog.dragStartPosY; // Y 축으로 움직인 거리로 움직인 후의 커서 좌표위치에서 드래그 시작 커서 위치를 뺀 결과
+            dialog.style.top = `${dialog.dragStartTop + deltaY}px`; // style의 top 을 새로 지정하는 것으로 드래그 시작 위치에서 움직인 거리를 더한 값을 넣어 주게 만듬
+            dialog.style.left = `${dialog.dragStartLeft + deltaX}px`; // 문자열 형식으로 표시
+            // {``}은 {'ㅁㄴ' + dialog} 같은 형식을 쉽게 적기 위한 것이다
+        });
+        main.addEventListener('mouseup', function () { // addEventListener()는 이벤트를 등록하기위해 사용하는 함수로 여러개의 이벤트를 삽입할 수 있다 여러개를 사용하여 복수의 객체에 하나의 이벤트 리스너를 사용할 수 있다. // 마우스를 땟을 때를 문자열인 mouseup (특정 요소) 가 발동하면 뒤의 함수를 실행 시킨다
+            if (dialog.isMoving !== true) { // isMoving 이 true 가 아닌 경우에
+                return; // 아무 값도 내놓지 않은 상태로 반환
+            }
+            console.log("옮기기 끝"); // 확인용
+            dialog.isMoving = false; // isMoving 디폴트 값인 true 가 false 로 변경 시킴
+            saveDialogs(); // 해당 요소를 최신화(저장)
+        });
+
+        main.addEventListener('mouseleave', function () { // 드래그가 종료되었을 때 즉 마우스를 땟을 때
+            if (dialog.isMoving !== true) {
+                return; // 아무 값도 반환하지 않음
+            }
+            console.log("옮기기 끝");
+            dialog.isMoving = false;
+            saveDialogs();
+        })
+
+        // 최대화
+        const maximizeButton = dialog.querySelector(':scope > .title-bar > .button.maximized');
+        maximizeButton.onclick = function () {
+            if (dialog.isMaximized === true) { // dialog의 isMaximized 가 true면 아래 쿼리를 실행
+                dialog.style.top = `${dialog.originalTop}px`; // 스타일 변경
+                dialog.style.left = `${dialog.originalLeft}px`;
+                dialog.style.width = `${dialog.originalWidth}px`;
+                dialog.style.height = `${dialog.originalHeight}px`;
+                dialog.isMaximized = false; // isMaximized 가 거짓으로 변경되게 설정
+                dialog.classList.remove('maximized'); // 최대화가 되었기에 maximized 클래스를 삭제
+            } else {
+                dialog.originalTop = dialog.offsetTop; // 최대화 이전 크기와 위치를 기억하기 위해 사용하는것
+                dialog.originalLeft = dialog.offsetLeft;
+                dialog.originalWidth = dialog.offsetWidth - 2;
+                dialog.originalHeight = dialog.offsetHeight - 2;
+
+                dialog.isMaximized = true;
+                dialog.classList.add('maximized');
+                dialog.style.zIndex = ++lastZIndex;
+            }
+            saveDialogs();
+        }
+
+        // 최소화
+        const minimizeButton = dialog.querySelector(':scope > .title-bar > .button.minimized');
+        minimizeButton.onclick = function () {
+            createFooterItem(dialog); // 외부 함수를 가지고 옴 인자 값으로 dialog 를 넣어줌
+            dialog.isMinimized = true;
+            dialog.classList.add('minimized');
+            saveDialogs();
+        }
+
+        // 닫기
+        const closeButton = dialog.querySelector(':scope > .title-bar > .button.close');
+        closeButton.onclick = function () { // closeButton 을 눌렀을 때 함수 실행
+            dialog.remove(); // 지우는 역할
+            saveDialogs(); // 닫기가 완료되면 저장을 시키기 위해
+        }
+
+        // 크기조절 // 옮기기와 똑같은 구조이다
+        const resizeImg = dialog.querySelector(':scope > .status-bar > .resize');
+        resizeImg.onmousedown = function (e) {
+            dialog.isResizing = true;
+            dialog.resizeStartPosX = e.pageX; // 크기 조절시작 커서 X 위치
+            dialog.resizeStartPosY = e.pageY; // 크기 조절 시작 커서 Y 위치(좌표)
+            dialog.resizeStartWidth = dialog.offsetWidth - 2; // 크기 조절 시작 가로 크기
+            dialog.resizeStartHeight = dialog.offsetHeight - 2; // 크기 조절 시작 세로 크기
+        }
+        main.addEventListener('mousemove', function (e){
+            if (dialog.isResizing !== true) {
+                return; // 아무 값도 주지않아 아무것도 실행시키지 않게 한다
+            }
+            const currentPosX = e.pageX // 현재 커서 X 좌표
+            const currentPosY = e.pageY // 현재 커서 X 좌표
+            const deltaX = currentPosX - dialog.resizeStartPosX; // X 축 움직인 거리
+            const deltaY = currentPosY - dialog.resizeStartPosY; // Y 축 움직인 거리
+            dialog.style.width = `${dialog.resizeStartWidth + deltaX}px`;
+            dialog.style.height = `${dialog.resizeStartHeight + deltaY}px`;
+        });
+        main.addEventListener('mouseup',function (){
+            if (dialog.isResizing !== true) {
+                return;
+            }
+            dialog.isResizing = false;
+            saveDialogs();
+        });
+        main.addEventListener('mouseleave',function (){
+            if (dialog.isResizing !== true) {
+                return;
+            }
+            dialog.isResizing = false;
+            saveDialogs();
+        })
+    }
+
+    function createDialog(params) { // params 는 매개변수이다.(인자값으로 들어 갈 공간)
+        params['id'] ??= Math.random(); // 아래 parseFromString 을 사용할때 집어 넣어줄 값을 미리 설정하는 것이다
+        params['top'] ??= 0; // 없으면 0 으로 설정하게 한다 // ??= 는 널리쉬로 부르며 해당 값이 없는경우에 뒤의 value 를 추가한다는 의미로 쓰인다
+        params['left'] ??= 0;
+        params['width'] ??= 0;
+        params['height'] ??= 0;
+        params['zIndex'] ??= 0;
+        params['isMaximized'] ??= false;
+        params['isMinimized'] ??= false;
+        const dialog = new DOMParser().parseFromString(`<!-- DOMParser() : 새로운 DOMParser객체를 생성  // 문자열(string)의 XML 또는 HTML 소스 코드를 DOM Document로 분석∙구조화(parse) 할 수 있는 기반 .parseFromString() : DOMParser 의 하나뿐인 메서드로 문자열을 해당 형식의 구조로 변경해주는 기능을 한다-->
+        <div class="dialog" data-id="${params['id']}">
+            <div class="title-bar">
+                <span class="title">${params['title']}</span>
+                <button class="button minimized" type="button">
+                    <img alt="최소화" class="icon" src="./dialog.minimize.png">
+                </button>
+                <button class="button maximized" type="button">
+                    <img alt="최대화" class="icon" src="./dialog.maximize.png">
+                </button>
+                <button class="button close" type="button">
+                    <img alt="닫기" class="icon" src="./dialog.close.png">
+                </button>
+            </div>
+            <div class="content">${params['content']}</div>
+            <div class="status-bar">
+                <div class="spring"></div>
+                <img alt="" class="resize" src="./dialog.resize.png">
+            </div>
+        </div>`,'text/html').querySelector('.dialog[data-id]'); // parseFromString 첫 번째 적어준 요소 : html 구조 (혹은 xml 의 구조) , 두 번째 적어준 요소 : MIMETYPE 문자열을 구문 분석하는 데 XML 파서 또는 HTML 파서가 사용되는지 여부를 결정할때 사용됨 // 뒤의 querySelector 를 통해 해당 함수에서 문자열인('') .dialog(클래스)와 속성인 data-id([data-id])가 들어가는 것을 찾아낸다
+        // 위의 div 태그는 문자열이다 // 두 번째에 적어준 요소는 보통 'text/html 로 고정이 된다 // 구문 분석을 위해서 DOMParser().parserFromString(문자열,mimeType) 를 쓰는편이다
+        attachDialogEvents(dialog);
+        dialog.style.top = `${params['top']}px`;
+        dialog.style.left = `${params['left']}px`;
+        dialog.style.width = `${params['width']}px`;
+        dialog.style.height = `${params['height']}px`;
+        dialog.style.zIndex = params['zIndex'];
+        dialog.isMaximized = params['isMaximized'];
+        dialog.isMinimized = params['isMinimized'];
+        dialog.originalTop = params['originalTop'];
+        dialog.originalLeft = params['originalLeft'];
+        dialog.originalWidth = params['originalWidth'];
+        dialog.originalHeight = params['originalHeight'];
+        if (dialog.isMaximized === true) {
+            dialog.classList.add('maximized');
+        }
+        if (dialog.isMinimized === true){
+            createFooterItem(dialog);
+            dialog.classList.add('minimized');
+        }
+        main.append(dialog); // dialog 추가
+        return dialog; // 반환값 : dialog
+    }
+
+    function createFooterItem(dialog) {
+        const item = document.createElement('div');
+        item.classList.add('item');
+        item.innerText = dialog.querySelector(':scope > .title-bar > .title').innerText;
+        item.onclick = function () { // 하단 최소화된 item을 누르면 나타나게 하는 작업
+            item.remove(); // 선택한 요소인 item 을 제거
+            dialog.classList.remove('minimized'); // minimized 클래스 제거
+            dialog.isMinimized = false; // isMinimized 가 거짓으로
+            dialog.style.zIndex = ++lastZIndex; // 제일 앞에 보이게 만들어줌
+            saveDialogs();
+        }
+        footer.append(item);
+        return item;
+    }
+
+    function loadDialogs(){
+        const dialogs = JSON.parse(localStorage.getItem('dialogs') ?? '{}'); // JSON.parse를 통해 최초 진입시 아무 것도 나타나지 않게 한다
+        const ids = Object.keys(dialogs);
+        for (const id of ids) {
+            let dialog = dialogs[id];
+            dialog['id'] = id;
+            createDialog(dialog);
+            lastZIndex = Math.max(lastZIndex, dialog['zIndex']); // lastZIndex 에 둘 중 큰값을 넣게 만들어 준다
+        }
+    }
+
+    function saveDialogs() {
+        const dialogs = main.querySelectorAll(':scope > .dialog'); // 상수선언
+        let toSave = {}; // 빈 오브젝트 생성
+        for (const dialog of dialogs) { // for of 를 통해 해당 복수형을 단수형으로 바꿔서 아래 쿼리를 실행
+            const id = dialog.dataset.id; // '0.1','0.2' 를 받는 상수 생성
+            let zIndex = parseInt(dialog.style.zIndex); // 값이 바뀔 수 있기에 let 으로 선언 parseInt를 통해 해당 인자의 문자열형태인 정수를 일반 정수로 표현
+            if (isNaN(zIndex)) { // 조건문으로 isNaN을 통해 인자값(zIndex)이 정수(숫자)형이 아닌가를 조건으로 달음
+                zIndex = 0; // zIndex 에 0 을 할당
+            }
+            toSave[id] = { // toSave[id]
+                top : dialog.offsetTop, // top 부분에 dialog의 offsetTop 을 표현하겠다는 말이다 // 개발자 도구시 나타나는
+                left : dialog.offsetLeft,
+                width : dialog.offsetWidth -2, // 테두리(2)까지 포함하기에 새로고침을 할 때 마다 해당 창이 커지게 된다 그렇기에 -2를 넣어 준다
+                height : dialog.offsetHeight -2,
+                zIndex : zIndex,
+                isMaximized : dialog.isMaximized ?? false,
+                isMinimized : dialog.isMinimized ?? false,
+                originalTop : dialog.originalTop,
+                originalLeft : dialog.originalLeft,
+                originalWidth : dialog.originalWidth,
+                originalHeight : dialog.originalHeight,
+                title : dialog.querySelector(':scope > .title-bar > .title').innerText,
+                content : dialog.querySelector(':scope > .content').innerText,
+            };
+        }
+        toSave = JSON.stringify(toSave); // JSON.parse : 문자열을 오브젝트나 배열로 나타내게 한다 // JSON.stringify : 오브젝트나 배열을 문자열로 나타내게 한다
+        localStorage.setItem('dialogs', toSave); // 브라우저에 key 와 value 값을 Storage 에 저장하는 용도 // 저장된 데이터는 세션간 공유가 가능함
+        /* localStorage 의 속성으로는 setItem() : key,value 추가,
+                                    getItem() : value 읽어오기,
+                                    removeItem() : item 삭제,
+                                    clear() : 도메인 내에 저장되어있는 localStorage value 삭제,
+                                    length : 전체 item 의 갯수 확인,
+                                    key() : index 로 key 값 찾아낼 수 있음*/
+    }
+
+    addForm.onsubmit = function (e) {
+        e.preventDefault(); // 서브밋 버튼을 눌렀을때 발생하는 이벤트
+        createDialog({
+            title : addForm['title'].value, // 밑 줄이 쳐지는건 일종의 버그임으로 신경쓰지 않아도 된다. // title 부분에 addForm (위에 상수로 추가되어있음) 의
+            content : addForm['content'].value
+        }); // createDialog 의 인자값으로 들어가는 것
+        saveDialogs();
+    }
+
+    loadDialogs();
+    // main.querySelectorAll(':scope > .dialog')// main 의 자식인 .dialog 를 전부 잡음
+    //     .forEach(dialog => attachDialogEvents(dialog)); // 인자 역할을 할 dialog 에 :scope > .dialog 를 넣고 위의 함수 attachDialogEvents 에 해당 인자인 dialog를 삽입
+
+</script>
+</body>
+</html>

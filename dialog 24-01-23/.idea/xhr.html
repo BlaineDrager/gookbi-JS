@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>XHR 예제</title>
+    <style>
+        body {
+            background-color: #333333;
+        }
+    </style>
+</head>
+<body>
+<button id="button">IP 가져오기</button>
+<div id="result"></div>
+<script>
+    const button = document.getElementById('button');
+    const result = document.getElementById('result');
+    button.onclick = function () {
+        const xhr = new XMLHttpRequest(); // xhr 설정
+        xhr.onreadystatechange = function () { // readyState 가 변경되었을 때마다 실행할 함수를 설정
+            if (xhr.readyState !== XMLHttpRequest.DONE) { // 요청이 DONE (끝나지 않은 경우)
+                return;
+            }
+            if (xhr.status < 200 || xhr.status > 300) { // 요청 실패했을 경우
+                alert(`요청 실패(${xhr.status})`);
+                return;
+            }
+            console.log(xhr.responseText['ip']); // 서버응답을 문자열로 console에 나타나게 만든다 // ip는 여기서 찍어봐야한다
+
+            result.innerText = JSON.parse(xhr.responseText)['ip']; // result의
+        }
+        xhr.open('GET','http://api64.ipify.org?format=json'); // xhr 호출 //  이 방식으로 주소를 보낼 준비를 하는 것
+        xhr.send(); // 실질적인 주소를 보내는 용도
+
+
+    }
+</script>
+</body>
+</html>

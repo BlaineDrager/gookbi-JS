@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>address(주소) 찾기</title>
+    <link href="./address.css" rel="stylesheet">
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script><!--api 를 땡겨오기 위해서 넣어준 스크립트 아래의 js 파일보다 반드시 위에 있어야 한다-->
+    <script defer src="./address.js"></script>
+</head>
+<body>
+<div id="addressFinder">
+    <img src="./address.close.png" alt="닫기" class="close">
+    <div class="dialog"></div>
+</div>
+<form id="registerForm">
+    <h1 class="title">회원가입</h1>
+    <label class="label">
+        <span class="text">이메일</span>
+        <span class="horizontal">
+            <input autofocus required type="email" name="email" minlength="5" maxlength="50" class="input">
+            <input type="button" name="emailSend" value="인증번호 전송" class="button">
+        </span>
+        <span class="horizontal">
+            <input disabled required type="text" name="emailCode" minlength="6" maxlength="6" class="input">
+            <input disabled type="button" name="emailVerify" value="인증번호 확인" class="button">
+        </span>
+    </label>
+    <label class="label">
+        <span class="text">비밀번호</span>
+        <input required type="password" name="password" minlength="5" maxlength="50" class="input">
+        <input required type="password" name="passwordCheck" minlength="5" maxlength="50" class="input">
+        <span class="hint">비밀번호를 한 번 더 입력해 주세요</span>
+    </label>
+    <label class="label">
+        <span class="text">성명, 성별 및 생년 월일</span>
+        <span class="horizontal">
+            <input required type="text" name="name" minlength="2" maxlength="5" placeholder="성명" class="input">
+            <select required class="input" name="gender">
+                <option disabled hidden selected value="-1">성별</option>
+                <option value="M">남자</option>
+                <option value="F">여자</option>
+            </select>
+        </span>
+        <input required type="date" name="birth" class="input">
+    </label>
+    <label class="label">
+        <span class="text">연락처</span>
+        <span class="horizontal">
+            <select required name="contactCompany" class="input">
+                <option disabled hidden selected value="-1">통신사</option>
+                <option value="KT">KT</option>
+                <option value="LGU">LGU</option>
+                <option value="SKT">SKT</option>
+            </select>
+            <select required class="input" name="contactFirst">
+                <option selected value="010">010</option>
+            </select>
+            <input required name="contactSecond" maxlength="4" minlength="3" placeholder="0000" type="text" class="input">
+            <input required name="contactThird" maxlength="4" minlength="4" placeholder="0000" type="text" class="input">
+            <input type="button" name="contactSend" value="인증번호 전송" class="button">
+        </span>
+        <span class="horizontal">
+            <input disabled type="text" name="contactCode" maxlength="6" minlength="6" class="input">
+            <input disabled type="button" name="contactVerify" value="인증번호 확인" class="button">
+        </span>
+    </label>
+    <label class="label">
+        <span class="text">주소</span>
+        <span class="horizontal">
+            <input required class="input" maxlength="5" minlength="5" name="addressPostal" placeholder="우편번호" type="text">
+            <input type="button" value="우편번호 찾기" name="addressFind" class="button">
+        </span>
+        <input readonly type="text" class="input" maxlength="100" minlength="5" name="addressPrimary" placeholder="기본 주소">
+        <input class="input" maxlength="100" name="addressSecondary" placeholder="상세 주소(건물 이름, 층, 상호명, 동, 호 등)" type="text">
+        <span class="hint">주소를 올바르게 적지 않을 경우 사은품 등이 올바르게~~</span>
+    </label>
+</form>
+</body>
+</html>
